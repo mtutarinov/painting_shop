@@ -1,0 +1,33 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}
+{% if category %}{{ category.name }}{% else %}Картины{% endif %}
+{% endblock %}
+{% block content %}
+<div id="sidebar">
+    <h3>Категории</h3>
+    <ul>
+        <li {% if not category %}class="selected" {% endif %}>
+            <a href="{% url 'shop:paintings' %}">Все</a>
+        </li>
+        {% for c in categories %}
+        <li {% if category.slug == c.slug %}class="selected" {% endif %}>
+            <a href="{{ c.get_absolute_url }}">{{ c.name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+<div id="main" class="product-list">
+    <h1>{% if category %}{{ category.name }}{% else %} Все {% endif %}</h1>
+    {% for paint in paintings %}
+    <div class="item">
+        <a href="{{ paint.get_absolute_url }}">
+            <img src="{{ paint.image.url }}">
+        </a>
+        <a href="{{ paint.get_absolute_url }}">{{ paint.name }}</a>
+        <br>
+        {{ paint.price }} руб.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

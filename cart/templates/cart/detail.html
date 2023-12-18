@@ -1,0 +1,44 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% block title %}
+Избранное
+{% endblock %}
+
+{% block content %}
+<h1>Избранное</h1>
+<table class="cart">
+    <thead>
+    </thead>
+    <tbody>
+    {% for item in cart %}
+    {% with painting=item.painting %}
+    <tr>
+        <td>
+            <a href="{{ painting.get_absolute_url }}">
+                <img src="{{ painting.image.url }}">
+            </a>
+        </td>
+        <td>{{ painting.name }}</td>
+
+        <td>
+            <form action="{% url 'cart:cart_remove' painting.id %}" method="post">
+            <input type="submit" value="Удалить">
+            {% csrf_token %}
+            </form>
+        </td>
+        <td class="num">{{ item.price }} руб.</td>
+    </tr>
+    {% endwith %}
+    {% endfor %}
+    <tr class="total">
+        <td>Общая стомиость</td>
+        <td colspan="4"></td>
+        <td class="num">{{ cart.get_total_price }} руб.</td>
+    </tr>
+    </tbody>
+</table>
+<p class="text-right">
+    <a href="{% url 'shop:paintings' %}" class="button light">Продолжить просмотр</a>
+    <a href="{% url 'orders:order_create' %}" class="button">Перейти к оформлению</a>
+</p>
+{% endblock %}

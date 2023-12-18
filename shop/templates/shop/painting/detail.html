@@ -1,0 +1,21 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% block title %}
+{{ painting.name }}
+{% endblock %}
+{% block content %}
+<div class="product-detail">
+    <img src="{{ painting.image.url }}">
+    <h1>{{ painting.name }}</h1>
+    <h2>
+        <a href="{{ painting.category.get_absolute_url }}">{{ painting.category }}
+        </a>
+    </h2>
+    <p class="price">{{ painting.price }} руб.</p>
+    <form action="{% url 'cart:cart_add' painting.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Добавить в избранное</button>
+    </form>
+    {{ painting.description|linebreaks }}
+</div>
+{% endblock %}
