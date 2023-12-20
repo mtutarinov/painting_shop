@@ -29,9 +29,7 @@
         {{ paint.price }} руб.
     </div>
     {% endfor %}
-    <br>
-    {% include "pagination.html" with page=paintings %}
 </div>
-
-
+<br>
+{% include "pagination.html" with page=paintings %}
 {% endblock %}
