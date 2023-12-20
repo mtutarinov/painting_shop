@@ -30,11 +30,12 @@ class Painting(models.Model):
     price = models.DecimalField(max_digits=10,
                                 decimal_places=2, verbose_name='Цена')
     available = models.BooleanField(default=True, verbose_name='Опубликовано')
+    sold = models.BooleanField(default=False, verbose_name='Продано')
     created = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     updated = models.DateTimeField(auto_now=True, verbose_name='Изменено')
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-created']
         verbose_name = 'Картина'
         verbose_name_plural = 'Картины'
         indexes = [

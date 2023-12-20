@@ -330,3 +330,9 @@ form div.field {
     color:#666;
     border-radius:4px;
 }
+
+/* pagination */
+.pagination {
+    margin:40px 0;
+    font-weight:bold;
+}

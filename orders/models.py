@@ -30,7 +30,7 @@ class Order(models.Model):
 class OrderPainting(models.Model):
     order = models.ForeignKey(Order, related_name='paintings', on_delete=models.CASCADE, verbose_name='Заказ')
     painting = models.ForeignKey(Painting, related_name='order_paintings', on_delete=models.CASCADE, verbose_name='Картина')
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, verbose_name='Цена')
 
     def __str__(self):
         return str(self.id)

@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
 <div class="product-detail">
-    <img src="{{ painting.image.url }}">
+    <img src="{% if paint.image %}{{ paint.image.url }}{% else %}{% static 'img/no_image.png' %}{% endif %}">
     <h1>{{ painting.name }}</h1>
     <h2>
         <a href="{{ painting.category.get_absolute_url }}">{{ painting.category }}
