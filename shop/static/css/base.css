@@ -193,8 +193,10 @@ ul.errorlist {
 }
 
 .product-list .item img {
-    width:100%;
+    width: 400px;
+    height: 400px;
     margin-bottom:8px;
+    object-fit: contain;
 }
 
 .product-detail {
