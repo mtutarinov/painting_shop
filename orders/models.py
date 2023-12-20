@@ -36,17 +36,6 @@ class Order(models.Model):
     def get_total_cost(self):
         return sum(painting.get_cost() for painting in self.paintings.all())
 
-    def save(self, *args, **kwargs):
-        old_status = Order.objects.get(pk=self.pk).status
-        if self.status == self.Status.SUCCESS and old_status != self.Status.SUCCESS:
-            with transaction.atomic():
-                if any(op.painting.sold for op in self.order_paintings.all()):
-                    raise ValidationError("Один или несколько элементов в заказе уже проданы.")
-
-                for op in self.order_paintings.all():
-                    op.painting.sold = True
-                    op.painting.save()
-        super().save(*args, **kwargs)
 
 
 class OrderPainting(models.Model):

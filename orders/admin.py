@@ -1,7 +1,6 @@
-from django import forms
-from django.contrib import admin
-from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.contrib import admin, messages
 from .models import Order, OrderPainting
+from django.core.exceptions import ValidationError
 
 
 # class OrderPaintingForm(forms.ModelForm):
@@ -37,8 +36,31 @@ class OrderAdmin(admin.ModelAdmin):
     list_editable = ['status']
     list_display_links = ['full_name']
     inlines = [OrderPaintingInline]
+    change_form_template = 'admin/orders/order/change_order.html'
     search_fields = ['first_name', 'last_name', 'email', 'address', 'postal_code', 'city']
 
     @admin.display(description="Наличие", ordering=('first_name'))
     def full_name(self, order: Order):
         return f'{order.first_name} {order.last_name}'
+
+    def save_model(self, request, obj, form, change):
+        order_paintings = obj.order_paintings.all()
+        if change:
+            old_status = Order.objects.get(pk=obj.pk).status
+            if obj.status == Order.Status.SUCCESS and old_status != Order.Status.SUCCESS:
+                if any(op.painting.sold for op in order_paintings):
+                    messages.set_level(request, messages.ERROR)
+                    messages.error(request, "Одна или несколько картин в заказе уже проданы.")
+                    return  # Stop the save operation
+
+                for op in obj.order_paintings.all():
+                    op.painting.sold = True
+                    op.painting.save()
+
+            elif obj.status != Order.Status.SUCCESS and old_status == Order.Status.SUCCESS:
+                print('hi')
+                for op in obj.order_paintings.all():
+                    op.painting.sold = False
+                    op.painting.save()
+
+        super().save_model(request, obj, form, change)
