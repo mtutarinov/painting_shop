@@ -1,4 +1,6 @@
 from django.contrib import admin, messages
+from django.http import HttpResponseRedirect
+
 from .models import Order, OrderPainting
 from django.core.exceptions import ValidationError
 
@@ -64,3 +66,34 @@ class OrderAdmin(admin.ModelAdmin):
                     op.painting.save()
 
         super().save_model(request, obj, form, change)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        if 'paid_button' in request.POST:
+            self.custom_function(request, object_id)
+            return HttpResponseRedirect(request.get_full_path())
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def custom_function(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        order_paintings = obj.order_paintings.all()
+        old_status = Order.objects.get(pk=obj.pk).status
+        if old_status != Order.Status.SUCCESS:
+            if any(op.painting.sold for op in order_paintings):
+                messages.set_level(request, messages.ERROR)
+                messages.error(request, "Одна или несколько картин в заказе уже проданы.")
+                return  # Stop the save operation
+
+            for op in obj.order_paintings.all():
+                op.painting.sold = True
+                op.painting.save()
+        obj.status = Order.Status.SUCCESS
+        OrderForm = self.get_form(request, obj, change=True)
+        form = OrderForm(request.POST, request.FILES, instance=obj)
+        super().save_model(request, obj, form, change=True)
+        messages.success(request, 'Заказ оплачен')
+
+    # def has_add_permission(self, request):
+    #     return False
+
+    # def has_change_permission(self, request, obj=None):
+    #     return False
