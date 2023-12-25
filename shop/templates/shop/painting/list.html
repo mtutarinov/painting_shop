@@ -22,7 +22,7 @@
     {% for paint in paintings %}
     <div class="item">
         <a href="{{ paint.get_absolute_url }}">
-            <img src="{{ paint.image.url }}">
+            <img src="{% if paint.image %}{{ paint.image.url }}{% else %}{% static 'img/no_image.png' %}{% endif %}">
         </a>
         <a href="{{ paint.get_absolute_url }}">{{ paint.name }}</a>
         <br>
@@ -30,4 +30,6 @@
     </div>
     {% endfor %}
 </div>
+<br>
+{% include "pagination.html" with page=paintings %}
 {% endblock %}

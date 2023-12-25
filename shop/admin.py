@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Category, Painting
-
+from django.db.models.functions import Lower
 
 @admin.register(Category)
 class AdminCategory(admin.ModelAdmin):
@@ -32,7 +32,7 @@ class AdminPainting(admin.ModelAdmin):
     list_display = ['name', 'price', 'available']
     list_filter = [PriceListFilter, ('category', admin.RelatedOnlyFieldListFilter)]
     list_editable = ['price', 'available']
-    search_fields = ['name']
+    search_fields = ['name__icontains']
     search_help_text = 'Поиск по названию картины'
     show_full_result_count = False
     prepopulated_fields = {'slug': ('name',)}

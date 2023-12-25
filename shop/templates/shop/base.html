@@ -11,9 +11,11 @@
     <h1>Магазин картин</h1>
 </div>
 <div id="subheader">
-    <li><a href="{% url 'shop:about' %}"> О художнике</a></li>
-    <li><a href="{% url 'shop:paintings' %}"> Картины</a></li>
-    <li><a href="{% url 'shop:contacts' %}"> Контакты</a></li>
+    <ul>
+        <li><a href="{% url 'shop:about' %}"> О художнике</a></li>
+        <li><a href="{% url 'shop:paintings' %}"> Картины</a></li>
+        <li><a href="{% url 'shop:contacts' %}"> Контакты</a></li>
+    </ul>
     <div class="cart">
         {% with total_items=cart|length %}
         {% if total_items > 0 %}

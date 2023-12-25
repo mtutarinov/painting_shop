@@ -193,8 +193,10 @@ ul.errorlist {
 }
 
 .product-list .item img {
-    width:100%;
+    width: 400px;
+    height: 400px;
     margin-bottom:8px;
+    object-fit: contain;
 }
 
 .product-detail {
@@ -327,4 +329,10 @@ form div.field {
     background:#efefef;
     color:#666;
     border-radius:4px;
+}
+
+/* pagination */
+.pagination {
+    margin:40px 0;
+    font-weight:bold;
 }

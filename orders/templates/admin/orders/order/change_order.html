@@ -1,0 +1,17 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block submit_buttons_bottom %}
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <input type="submit" value="Клиент оплатил" name="paid_button" class="default button">
+
+    <!-- Custom delete button -->
+    {% if original %}
+      <a href="{% url opts|admin_urlname:'delete' original.pk|admin_urlquote %}" class="deletelink button" style="background-color: red; color: white; padding: 5px 10px;">
+        {% trans "Delete" %}
+      </a>
+    {% endif %}
+
+  </div>
+   {{ block.super }}
+{% endblock %}
