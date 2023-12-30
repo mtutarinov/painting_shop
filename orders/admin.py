@@ -2,7 +2,6 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
 from .models import Order, OrderPainting
-from django.core.exceptions import ValidationError
 
 
 # class OrderPaintingForm(forms.ModelForm):
@@ -35,8 +34,9 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'full_name', 'status', 'email',
                     'address', 'postal_code', 'city']
     list_filter = ['created', 'status']
-    list_editable = ['status']
+    # list_editable = ['status']
     list_display_links = ['full_name']
+    readonly_fields = ['status']
     inlines = [OrderPaintingInline]
     change_form_template = 'admin/orders/order/change_order.html'
     search_fields = ['first_name', 'last_name', 'email', 'address', 'postal_code', 'city']
@@ -45,35 +45,40 @@ class OrderAdmin(admin.ModelAdmin):
     def full_name(self, order: Order):
         return f'{order.first_name} {order.last_name}'
 
-    def save_model(self, request, obj, form, change):
-        order_paintings = obj.order_paintings.all()
-        if change:
-            old_status = Order.objects.get(pk=obj.pk).status
-            if obj.status == Order.Status.SUCCESS and old_status != Order.Status.SUCCESS:
-                if any(op.painting.sold for op in order_paintings):
-                    messages.set_level(request, messages.ERROR)
-                    messages.error(request, "Одна или несколько картин в заказе уже проданы.")
-                    return  # Stop the save operation
-
-                for op in obj.order_paintings.all():
-                    op.painting.sold = True
-                    op.painting.save()
-
-            elif obj.status != Order.Status.SUCCESS and old_status == Order.Status.SUCCESS:
-                print('hi')
-                for op in obj.order_paintings.all():
-                    op.painting.sold = False
-                    op.painting.save()
-
-        super().save_model(request, obj, form, change)
+    # def save_model(self, request, order, form, change):
+    #     order_paintings = order.order_paintings.all()
+    #     if change:
+    #         old_status = Order.objects.get(pk=order.pk).status
+    #         if order.status == Order.Status.SUCCESS and old_status != Order.Status.SUCCESS:
+    #             if any(op.painting.sold for op in order_paintings):
+    #                 messages.set_level(request, messages.ERROR)
+    #                 messages.error(request, "Одна или несколько картин в заказе уже проданы.")
+    #                 return  # Stop the save operation
+    #
+    #             for op in order.order_paintings.all():
+    #                 op.painting.sold = True
+    #                 op.painting.save()
+    #
+    #         elif order.status != Order.Status.SUCCESS and old_status == Order.Status.SUCCESS:
+    #             for op in order.order_paintings.all():
+    #                 op.painting.sold = False
+    #                 op.painting.save()
+    #
+    #     super().save_model(request, order, form, change)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         if 'paid_button' in request.POST:
-            self.custom_function(request, object_id)
+            self.paid_function(request, object_id)
+            return HttpResponseRedirect(request.get_full_path())
+        elif 'processed_button' in request.POST:
+            self.processed_function(request, object_id)
+            return HttpResponseRedirect(request.get_full_path())
+        elif 'cancel_button' in request.POST:
+            self.cancel_function(request, object_id)
             return HttpResponseRedirect(request.get_full_path())
         return super().change_view(request, object_id, form_url, extra_context)
 
-    def custom_function(self, request, object_id):
+    def paid_function(self, request, object_id):
         obj = self.get_object(request, object_id)
         order_paintings = obj.order_paintings.all()
         old_status = Order.objects.get(pk=obj.pk).status
@@ -83,7 +88,7 @@ class OrderAdmin(admin.ModelAdmin):
                 messages.error(request, "Одна или несколько картин в заказе уже проданы.")
                 return  # Stop the save operation
 
-            for op in obj.order_paintings.all():
+            for op in order_paintings:
                 op.painting.sold = True
                 op.painting.save()
         obj.status = Order.Status.SUCCESS
@@ -91,6 +96,35 @@ class OrderAdmin(admin.ModelAdmin):
         form = OrderForm(request.POST, request.FILES, instance=obj)
         super().save_model(request, obj, form, change=True)
         messages.success(request, 'Заказ оплачен')
+
+    def processed_function(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        order_paintings = obj.order_paintings.all()
+        old_status = Order.objects.get(pk=obj.pk).status
+        if old_status == Order.Status.SUCCESS:
+            for op in order_paintings:
+                op.painting.sold = False
+                op.painting.save()
+        obj.status = Order.Status.PROCESSED
+        OrderForm = self.get_form(request, obj, change=True)
+        form = OrderForm(request.POST, request.FILES, instance=obj)
+        super().save_model(request, obj, form, change=True)
+        messages.success(request, 'Заказ обработан')
+
+
+    def cancel_function(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        order_paintings = obj.order_paintings.all()
+        old_status = Order.objects.get(pk=obj.pk).status
+        if old_status == Order.Status.SUCCESS:
+            for op in order_paintings:
+                op.painting.sold = False
+                op.painting.save()
+        obj.status = Order.Status.CANCELED
+        OrderForm = self.get_form(request, obj, change=True)
+        form = OrderForm(request.POST, request.FILES, instance=obj)
+        super().save_model(request, obj, form, change=True)
+        messages.success(request, 'Заказ обработан')
 
     # def has_add_permission(self, request):
     #     return False

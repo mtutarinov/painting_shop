@@ -3,7 +3,12 @@
 
 {% block submit_buttons_bottom %}
   <div style="display: flex; justify-content: space-between; align-items: center;">
-    <input type="submit" value="Клиент оплатил" name="paid_button" class="default button">
+    <div>
+      <input type="submit" value="Клиент оплатил" name="paid_button" class="default button">
+      <input type="submit" value="Обработано" name="processed_button" class="default button">
+      <input type="submit" value="Сохранить изменения" name="_continue" class="default button">
+      <input type="submit" value="Отменить" name="cancel_button" class="default button">
+    </div>
 
     <!-- Custom delete button -->
     {% if original %}
@@ -13,5 +18,5 @@
     {% endif %}
 
   </div>
-   {{ block.super }}
+<!--   {{ block.super }}-->
 {% endblock %}
